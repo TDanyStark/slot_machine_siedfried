@@ -49,6 +49,7 @@ const gameState = {
   forcedWinInNext: 0, // 0 = desactivado, 1-3 = ganará en los próximos X tiros
   winCount: 0,
   reels: [null, null, null], // Posiciones finales de cada reel (0-24)
+  winProbability: 0, // 0 = normal, 25, 50, 75 = probabilidad mejorada
 };
 
 /**
@@ -62,6 +63,11 @@ const acumuladoDiv = document.getElementById("acumulado");
 const indicatorDot = document.createElement("div");
 indicatorDot.id = "secret-indicator";
 document.querySelector("footer").appendChild(indicatorDot);
+
+// Botones de probabilidad
+const prob25Button = document.getElementById("prob25");
+const prob50Button = document.getElementById("prob50");
+const prob75Button = document.getElementById("prob75");
 
 /**
  * Audio Elements
@@ -113,6 +119,16 @@ async function spinReels() {
     Math.floor(Math.random() * ICON_MAP.length),
     Math.floor(Math.random() * ICON_MAP.length),
   ];
+
+  // Verificar si se debe aplicar probabilidad mejorada
+  if (gameState.winProbability > 0) {
+    const randomValue = Math.random() * 100;
+    if (randomValue < gameState.winProbability) {
+      // Forzar victoria con el porcentaje configurado
+      const winningLogo = Math.floor(Math.random() * ICON_MAP.length);
+      finalPositions = [winningLogo, winningLogo, winningLogo];
+    }
+  }
 
   // Si está habilitado el modo forzado, verificar si debe ganar en este tiro
   if (gameState.forcedWinInNext > 0) {
@@ -255,6 +271,37 @@ function updateIndicatorState() {
 }
 
 /**
+ * Toggle Probability Mode
+ */
+function toggleProbability(probability) {
+  if (gameState.spinning) return;
+  
+  // Si ya está activo, desactivarlo; si no, activarlo
+  if (gameState.winProbability === probability) {
+    gameState.winProbability = 0;
+  } else {
+    gameState.winProbability = probability;
+  }
+  
+  // Actualizar estilos de botones
+  updateProbabilityButtons();
+}
+
+/**
+ * Update Probability Buttons Style
+ */
+function updateProbabilityButtons() {
+  [prob25Button, prob50Button, prob75Button].forEach(button => {
+    const prob = parseInt(button.dataset.probability);
+    if (prob === gameState.winProbability) {
+      button.classList.add("active");
+    } else {
+      button.classList.remove("active");
+    }
+  });
+}
+
+/**
  * Event Listeners
  */
 spinButton.addEventListener("click", spinReels);
@@ -273,8 +320,14 @@ titleElement.addEventListener("click", () => {
   }
 });
 
+// Event listeners para botones de probabilidad
+prob25Button.addEventListener("click", () => toggleProbability(25));
+prob50Button.addEventListener("click", () => toggleProbability(50));
+prob75Button.addEventListener("click", () => toggleProbability(75));
+
 /**
  * Initialize
  */
 initializeReels();
 updateCounterDisplay();
+updateProbabilityButtons();
