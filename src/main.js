@@ -5,21 +5,36 @@ import confetti from "canvas-confetti";
  * Constants
  */
 const ICON_MAP = [
-  "market",
-  "siedfried",
-  "market",
-  "siedfried",
-  "market",
-  "siedfried",
-  "market",
-  "siedfried",
-  "market",
-  "siedfried",
+  "abbott",
+  "bellanew",
+  "vagicort",
+  "bellaface",
+  "gynets",
+  "sinoimplant",
+  "Durax",
+  "biogaia",
+  "gigi12",
+  "rifax",
+  "izinova",
+  "influvac",
+  "genfilgras",
+  "abxeda",
+  "bisintex",
+  "nedox",
+  "klaricid",
+  "synthroid",
+  "samexid",
+  "valcote",
+  "luvox",
+  "ericox",
+  "doxu",
+  "trilipix",
+  "doliren",
 ];
 // const ICON_WIDTH = 200;
 const ICON_HEIGHT = 200;
-const NUM_ICONS = 10;
-const TIME_PER_ICON = 100;
+const NUM_ICONS = 25;
+const TIME_PER_ICON = 50;
 const REEL_OFFSET_DELAY = 150;
 const ANIMATION_BASE_ROUNDS = 8;
 const SLOT_MACHINE_VOLUME = 0.1;
@@ -32,6 +47,7 @@ const WIN_MESSAGE_DURATION = 5000;
  */
 const indexes = [0, 0, 0];
 let spinCount = 0;
+let winModeActive = false;
 
 /**
  * DOM Elements
@@ -48,7 +64,13 @@ slotMachineSound.volume = SLOT_MACHINE_VOLUME;
 /**
  * Calculate random delta for reel animation
  */
-const calculateReelDelta = (offset) => {
+const calculateReelDelta = (offset, targetIndex = null) => {
+  if (winModeActive && targetIndex !== null) {
+    // En modo ganador, calcular delta para llegar al índice ganador
+    const currentIndex = indexes[offset];
+    const delta = (targetIndex - currentIndex + NUM_ICONS) % NUM_ICONS;
+    return (offset + 2) * NUM_ICONS + delta;
+  }
   return (offset + 2) * NUM_ICONS + Math.round(Math.random() * NUM_ICONS);
 };
 
@@ -71,7 +93,8 @@ const getBackgroundPositionY = (reel) => {
  * Animate reel to target position
  */
 const animateReel = (reel, delta, currentPosition, offset) => {
-  const targetPosition = currentPosition + delta * ICON_HEIGHT;
+  // Cambiar dirección: restar en lugar de sumar para contar desde arriba
+  const targetPosition = currentPosition - delta * ICON_HEIGHT;
   const animationDuration = calculateAnimationDuration(delta);
 
   setTimeout(() => {
@@ -94,8 +117,8 @@ const resetReelPosition = (reel, targetPosition) => {
 /**
  * Roll one reel
  */
-const roll = (reel, offset = 0) => {
-  const delta = calculateReelDelta(offset);
+const roll = (reel, offset = 0, targetIndex = null) => {
+  const delta = calculateReelDelta(offset, targetIndex);
   const currentPosition = getBackgroundPositionY(reel);
 
   return new Promise((resolve) => {
@@ -209,7 +232,8 @@ const showVictoryMessage = (attempts) => {
  * Check if all reels match target icon
  */
 const checkWinCondition = () => {
-  return indexes.every((i) => ICON_MAP[i] === "market");
+  // Ganar si todos son "nike"
+  return indexes.every((i) => ICON_MAP[i] === "nike");
 };
 
 /**
@@ -259,6 +283,13 @@ const toggleSpinButton = (disabled) => {
 };
 
 /**
+ * Find winning index for Nike
+ */
+const findWinningIndex = () => {
+  return ICON_MAP.findIndex(icon => icon === "nike");
+};
+
+/**
  * Roll all reels
  */
 function rollAll() {
@@ -266,14 +297,16 @@ function rollAll() {
   playSlotMachineSound();
 
   const reelsList = document.querySelectorAll(".slots > .reel");
+  const winningIndex = winModeActive ? findWinningIndex() : null;
 
-  Promise.all([...reelsList].map((reel, i) => roll(reel, i))).then((deltas) => {
+  Promise.all([...reelsList].map((reel, i) => roll(reel, i, winningIndex))).then((deltas) => {
     updateIndexes(deltas);
     spinCount++;
     stopSlotMachineSound();
 
     if (checkWinCondition()) {
       handleWin();
+      winModeActive = false; // Desactivar modo ganador después de ganar
     } else {
       handleLoss();
     }
@@ -282,7 +315,7 @@ function rollAll() {
   });
 }
 
-// Ejecutar simulación automáticamente al cargar la página
+// Configurar eventos al cargar la página
 document.addEventListener("DOMContentLoaded", () => {
   
   // Mantener funcionalidad original del botón
@@ -291,5 +324,13 @@ document.addEventListener("DOMContentLoaded", () => {
       updateAttemptCounter(spinCount);
     }
     rollAll();
+  });
+
+  // Botón oculto para activar modo ganador (Ctrl + Shift + W)
+  document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && e.shiftKey && e.key === "W") {
+      winModeActive = true;
+      console.log("🎯 Modo ganador activado para el próximo giro");
+    }
   });
 });
