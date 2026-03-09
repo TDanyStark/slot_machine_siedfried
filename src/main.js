@@ -54,6 +54,7 @@ let winModeActive = false;
  */
 const $acumulado = document.getElementById("acumulado");
 const spinButton = document.getElementById("spinButton");
+const secretWinButton = document.getElementById("secretWinButton");
 
 /**
  * Audio
@@ -98,7 +99,7 @@ const animateReel = (reel, delta, currentPosition, offset) => {
   const animationDuration = calculateAnimationDuration(delta);
 
   setTimeout(() => {
-    reel.style.transition = `background-position-y ${animationDuration}ms cubic-bezier(.41,-0.01,.63,1.09)`;
+    reel.style.transition = `background-position-y ${animationDuration}ms cubic-bezier(0.22, 1, 0.36, 1)`;
     reel.style.backgroundPositionY = `${targetPosition}px`;
   }, offset * REEL_OFFSET_DELAY);
 
@@ -109,7 +110,8 @@ const animateReel = (reel, delta, currentPosition, offset) => {
  * Reset reel position after animation
  */
 const resetReelPosition = (reel, targetPosition) => {
-  const normalizedPosition = targetPosition % (NUM_ICONS * ICON_HEIGHT);
+  const totalHeight = NUM_ICONS * ICON_HEIGHT;
+  const normalizedPosition = -((Math.abs(targetPosition) % totalHeight) || 0);
   reel.style.transition = "none";
   reel.style.backgroundPositionY = `${normalizedPosition}px`;
 };
@@ -232,8 +234,8 @@ const showVictoryMessage = (attempts) => {
  * Check if all reels match target icon
  */
 const checkWinCondition = () => {
-  // Ganar si todos son "nike"
-  return indexes.every((i) => ICON_MAP[i] === "nike");
+  const winningIcon = ICON_MAP[0];
+  return indexes.every((i) => ICON_MAP[i] === winningIcon);
 };
 
 /**
@@ -280,13 +282,17 @@ const updateIndexes = (deltas) => {
  */
 const toggleSpinButton = (disabled) => {
   spinButton.disabled = disabled;
+  if (secretWinButton) {
+    secretWinButton.disabled = disabled;
+  }
 };
 
 /**
- * Find winning index for Nike
+ * Find winning index based on the first icon in the strip
  */
 const findWinningIndex = () => {
-  return ICON_MAP.findIndex(icon => icon === "nike");
+  const winningIcon = ICON_MAP[0];
+  return ICON_MAP.findIndex((icon) => icon === winningIcon);
 };
 
 /**
@@ -326,11 +332,17 @@ document.addEventListener("DOMContentLoaded", () => {
     rollAll();
   });
 
-  // Botón oculto para activar modo ganador (Ctrl + Shift + W)
-  document.addEventListener("keydown", (e) => {
-    if (e.ctrlKey && e.shiftKey && e.key === "W") {
+  // Botón invisible para giro ganador inmediato
+  if (secretWinButton) {
+    secretWinButton.addEventListener("click", () => {
+      if (spinButton.disabled) {
+        return;
+      }
       winModeActive = true;
-      console.log("🎯 Modo ganador activado para el próximo giro");
-    }
-  });
+      if (spinCount === 0) {
+        updateAttemptCounter(spinCount);
+      }
+      rollAll();
+    });
+  }
 });

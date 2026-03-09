@@ -134,8 +134,24 @@ body {
 /* Controls container */
 .controls {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   margin-top: 16px;
+}
+
+#secretWinButton {
+  width: 160px;
+  height: 18px;
+  margin-top: 10px;
+  opacity: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+#secretWinButton:disabled {
+  pointer-events: none;
 }
 
 /* 3D Game-style Spin Button */
