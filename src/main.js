@@ -119,9 +119,16 @@ async function spinReels() {
     updateMagicButtonState();
   }
 
-  // Animar cada reel con rotaciones múltiples + suavizado
+  // Animar cada reel con retraso secuencial (efecto cascada)
+  const REEL_START_DELAY = 200; // ms delay entre inicio de cada reel
+  const REEL_STOP_DELAY = 300; // ms delay adicional para que paren en secuencia
+  
   const animations = reels.map((reel, index) => {
-    return animateReel(reel, finalPositions[index]);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        animateReel(reel, finalPositions[index], index * REEL_STOP_DELAY).then(resolve);
+      }, index * REEL_START_DELAY);
+    });
   });
 
   // Esperar a que todas las animaciones terminen
@@ -144,7 +151,7 @@ async function spinReels() {
 /**
  * Animate Single Reel - Rotación fluida con easing
  */
-function animateReel(reel, finalLogoIndex) {
+function animateReel(reel, finalLogoIndex, stopDelay = 0) {
   return new Promise((resolve) => {
     // Remover transición anterior para resetear
     reel.style.transition = "none";
@@ -157,8 +164,9 @@ function animateReel(reel, finalLogoIndex) {
     // Forzar reflow para asegurar que se aplique la posición inicial
     void reel.offsetHeight;
     
-    // Aplicar transición y nueva posición
-    reel.style.transition = `background-position ${SPIN_DURATION}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+    // Aplicar transición y nueva posición (con duración ajustada)
+    const adjustedDuration = SPIN_DURATION + stopDelay;
+    reel.style.transition = `background-position ${adjustedDuration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
     const finalPosition = -(finalLogoIndex - 1) * LOGO_HEIGHT_VISUAL;
     reel.style.backgroundPosition = `0px ${finalPosition}px`;
 
@@ -166,7 +174,7 @@ function animateReel(reel, finalLogoIndex) {
     setTimeout(() => {
       reel.style.transition = "none";
       resolve();
-    }, SPIN_DURATION);
+    }, adjustedDuration);
   });
 }
 
