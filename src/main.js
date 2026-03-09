@@ -34,10 +34,8 @@ const ICON_MAP = [
   "doliren",
 ];
 
-const LOGO_HEIGHT = 512; // px - altura de cada logo en la tira (12797px / 25 logos)
 const SPIN_DURATION = 2500; // ms - duración del giro (más rápido)
 const BACKOFF = 3; // Múltiplo de rotaciones antes de frenar para efecto suave
-const REEL_WIDTH = 200; // px - ancho visual del reel
 const REEL_HEIGHT = 600; // px - altura visual del reel (3 logos de 200px cada uno)
 const LOGO_HEIGHT_VISUAL = REEL_HEIGHT / 3; // altura visual de cada logo
 
@@ -56,7 +54,6 @@ const gameState = {
  */
 const reels = Array.from(document.querySelectorAll(".reel"));
 const spinButton = document.getElementById("spinButton");
-const magicButton = document.getElementById("secretWinButton");
 const acumuladoDiv = document.getElementById("acumulado");
 
 // Botones de probabilidad
@@ -102,7 +99,6 @@ async function spinReels() {
 
   gameState.spinning = true;
   spinButton.disabled = true;
-  magicButton.disabled = true;
 
   // Reproducir sonido de giro
   spinSound.currentTime = 0;
@@ -227,7 +223,6 @@ function handleWin() {
 function endSpin() {
   gameState.spinning = false;
   spinButton.disabled = false;
-  magicButton.disabled = false;
 }
 
 /**
@@ -273,10 +268,6 @@ function updateProbabilityButtons() {
  */
 spinButton.addEventListener("click", spinReels);
 
-// Ocultar botón mágico original
-if (magicButton) {
-  magicButton.style.display = "none";
-}
 
 // Event listeners para botones de probabilidad
 prob10Button.addEventListener("click", () => toggleProbability(10));
