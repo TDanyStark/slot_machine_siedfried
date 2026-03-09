@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slot machine market - siedfried</title>
+</head>
+
+<body>
+  <div id="app">
+    <div class="video">
+      <div style="border-radius: 15px; overflow: hidden; display: inline-block;filter: drop-shadow(0 0 80px #c21f8c70) drop-shadow(0 0 80px #69239470);">
+        <iframe width="1050" height="590"
+          src="https://www.youtube-nocookie.com/embed/0MapRprRh24?si=L2wsjz1A-P3eYe1H" frameborder="0" allowfullscreen>
+        </iframe>
+      </div>
+
+    </div>
+
+    <div class="slots">
+      <div class="reel"></div>
+      <div class="reel"></div>
+      <div class="reel"></div>
+    </div>
+    <div class="controls">
+      <button id="spinButton" type="button">Girar</button>
+    </div>
+    <div class="info_section">
+      <h2>¡Juega y gana!</h2>
+      <p>Si obtienes tres logos de Market Support en la máquina, reclama tu premio al instante</p>
+    </div>
+    <div id="acumulado"></div>
+    <footer>
+      <p>App desarrollada por <a href="https://market-support.com" target="_blank">Market Support</a></p>
+    </footer>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
