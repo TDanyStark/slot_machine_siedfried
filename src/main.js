@@ -46,7 +46,6 @@ const LOGO_HEIGHT_VISUAL = REEL_HEIGHT / 3; // altura visual de cada logo
  */
 const gameState = {
   spinning: false,
-  forcedWinInNext: 0, // 0 = desactivado, 1-3 = ganará en los próximos X tiros
   winCount: 0,
   reels: [null, null, null], // Posiciones finales de cada reel (0-24)
   winProbability: 0, // 0 = normal, 10, 20, 40 = probabilidad mejorada
@@ -58,11 +57,7 @@ const gameState = {
 const reels = Array.from(document.querySelectorAll(".reel"));
 const spinButton = document.getElementById("spinButton");
 const magicButton = document.getElementById("secretWinButton");
-const titleElement = document.querySelector(".info_section h2");
 const acumuladoDiv = document.getElementById("acumulado");
-const indicatorDot = document.createElement("div");
-indicatorDot.id = "secret-indicator";
-document.querySelector("footer").appendChild(indicatorDot);
 
 // Botones de probabilidad
 const prob10Button = document.getElementById("prob10");
@@ -128,23 +123,6 @@ async function spinReels() {
       const winningLogo = Math.floor(Math.random() * ICON_MAP.length);
       finalPositions = [winningLogo, winningLogo, winningLogo];
     }
-  }
-
-  // Si está habilitado el modo forzado, verificar si debe ganar en este tiro
-  if (gameState.forcedWinInNext > 0) {
-    gameState.forcedWinInNext--;
-    
-    // Decidir aleatoriamente si gana en este tiro (mientras queden intentos)
-    const shouldWinNow = Math.random() < 0.5 || gameState.forcedWinInNext === 0;
-    
-    if (shouldWinNow) {
-      const winningLogo = Math.floor(Math.random() * ICON_MAP.length);
-      finalPositions = [winningLogo, winningLogo, winningLogo];
-      gameState.forcedWinInNext = 0; // Resetear después de ganar
-    }
-    
-    // Actualizar visual del indicador
-    updateIndicatorState();
   }
 
   // Animar cada reel con retraso secuencial (efecto cascada)
@@ -260,17 +238,6 @@ function updateCounterDisplay() {
 }
 
 /**
- * Update Indicator State - Mostrar/ocultar punto indicador
- */
-function updateIndicatorState() {
-  if (gameState.forcedWinInNext > 0) {
-    indicatorDot.classList.add("active");
-  } else {
-    indicatorDot.classList.remove("active");
-  }
-}
-
-/**
  * Toggle Probability Mode
  */
 function toggleProbability(probability) {
@@ -310,15 +277,6 @@ spinButton.addEventListener("click", spinReels);
 if (magicButton) {
   magicButton.style.display = "none";
 }
-
-// Activar modo secreto al hacer clic en el título
-titleElement.addEventListener("click", () => {
-  if (!gameState.spinning && gameState.forcedWinInNext === 0) {
-    // Activar para los próximos 1-3 tiros (aleatorio)
-    gameState.forcedWinInNext = Math.floor(Math.random() * 3) + 1;
-    updateIndicatorState();
-  }
-});
 
 // Event listeners para botones de probabilidad
 prob10Button.addEventListener("click", () => toggleProbability(10));
