@@ -1,5 +1,7 @@
 import "./style.css";
 import confetti from "canvas-confetti";
+import spinSoundUrl from "../public/slot-machine.mp3";
+import winSoundUrl from "../public/confetti-gun.mp3";
 
 /**
  * Constants
@@ -33,8 +35,11 @@ const ICON_MAP = [
 ];
 
 const LOGO_HEIGHT = 512; // px - altura de cada logo en la tira (12797px / 25 logos)
-const SPIN_DURATION = 3500; // ms - duración del giro
+const SPIN_DURATION = 2500; // ms - duración del giro (más rápido)
 const BACKOFF = 3; // Múltiplo de rotaciones antes de frenar para efecto suave
+const REEL_WIDTH = 200; // px - ancho visual del reel
+const REEL_HEIGHT = 600; // px - altura visual del reel (3 logos de 200px cada uno)
+const LOGO_HEIGHT_VISUAL = REEL_HEIGHT / 3; // altura visual de cada logo
 
 /**
  * Game State
@@ -57,10 +62,8 @@ const acumuladoDiv = document.getElementById("acumulado");
 /**
  * Audio Elements
  */
-const spinSound = new Audio("/slot-machine.mp3");
-const winSound = new Audio("/confetti-gun.mp3");
-spinSound.preload = "auto";
-winSound.preload = "auto";
+const spinSound = new Audio(spinSoundUrl);
+const winSound = new Audio(winSoundUrl);
 
 /**
  * Initialize Reels - Mostrar logos aleatorios iniciales
@@ -76,12 +79,13 @@ function initializeReels() {
 
 /**
  * Update Reel Positions - Actualizar background-position de los reels
+ * El logo ganador está en la posición del MEDIO (posición 1 de 0-1-2)
  */
 function updateReelPositions() {
   reels.forEach((reel, index) => {
     const logoIndex = gameState.reels[index];
-    const yOffset = -(logoIndex * LOGO_HEIGHT);
-    reel.style.backgroundPosition = `0 ${yOffset}px`;
+    const yOffset = -(logoIndex - 1) * LOGO_HEIGHT_VISUAL;
+    reel.style.backgroundPosition = `0px ${yOffset}px`;
   });
 }
 
@@ -142,19 +146,25 @@ async function spinReels() {
  */
 function animateReel(reel, finalLogoIndex) {
   return new Promise((resolve) => {
-    const startTime = performance.now();
-    const startPosition = parseFloat(reel.style.backgroundPosition) || 0;
-
-    // Calcular rotaciones totales: múltiples vueltas + posición final
+    // Remover transición anterior para resetear
+    reel.style.transition = "none";
+    
+    // Calcular posición inicial con múltiples rotaciones
     const rotations = BACKOFF * ICON_MAP.length + finalLogoIndex;
-    const totalDistance = rotations * LOGO_HEIGHT;
-
-    // Usar CSS animation con easing suave (cubic-bezier para aceleración-desaceleración)
+    const startPosition = -(rotations * LOGO_HEIGHT_VISUAL);
+    reel.style.backgroundPosition = `0px ${startPosition}px`;
+    
+    // Forzar reflow para asegurar que se aplique la posición inicial
+    void reel.offsetHeight;
+    
+    // Aplicar transición y nueva posición
     reel.style.transition = `background-position ${SPIN_DURATION}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
-    reel.style.backgroundPosition = `0 ${-(finalLogoIndex * LOGO_HEIGHT)}px`;
+    const finalPosition = -(finalLogoIndex - 1) * LOGO_HEIGHT_VISUAL;
+    reel.style.backgroundPosition = `0px ${finalPosition}px`;
 
     // Resolver cuando termine la animación
     setTimeout(() => {
+      reel.style.transition = "none";
       resolve();
     }, SPIN_DURATION);
   });
