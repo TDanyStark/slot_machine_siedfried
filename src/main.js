@@ -49,7 +49,7 @@ const gameState = {
   forcedWinInNext: 0, // 0 = desactivado, 1-3 = ganará en los próximos X tiros
   winCount: 0,
   reels: [null, null, null], // Posiciones finales de cada reel (0-24)
-  winProbability: 0, // 0 = normal, 25, 50, 75 = probabilidad mejorada
+  winProbability: 0, // 0 = normal, 10, 20, 40 = probabilidad mejorada
 };
 
 /**
@@ -65,9 +65,9 @@ indicatorDot.id = "secret-indicator";
 document.querySelector("footer").appendChild(indicatorDot);
 
 // Botones de probabilidad
-const prob25Button = document.getElementById("prob25");
-const prob50Button = document.getElementById("prob50");
-const prob75Button = document.getElementById("prob75");
+const prob10Button = document.getElementById("prob10");
+const prob20Button = document.getElementById("prob20");
+const prob40Button = document.getElementById("prob40");
 
 /**
  * Audio Elements
@@ -291,7 +291,7 @@ function toggleProbability(probability) {
  * Update Probability Buttons Style
  */
 function updateProbabilityButtons() {
-  [prob25Button, prob50Button, prob75Button].forEach(button => {
+  [prob10Button, prob20Button, prob40Button].forEach(button => {
     const prob = parseInt(button.dataset.probability);
     if (prob === gameState.winProbability) {
       button.classList.add("active");
@@ -321,9 +321,9 @@ titleElement.addEventListener("click", () => {
 });
 
 // Event listeners para botones de probabilidad
-prob25Button.addEventListener("click", () => toggleProbability(25));
-prob50Button.addEventListener("click", () => toggleProbability(50));
-prob75Button.addEventListener("click", () => toggleProbability(75));
+prob10Button.addEventListener("click", () => toggleProbability(10));
+prob20Button.addEventListener("click", () => toggleProbability(20));
+prob40Button.addEventListener("click", () => toggleProbability(40));
 
 /**
  * Initialize
