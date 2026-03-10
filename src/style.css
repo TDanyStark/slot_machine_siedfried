@@ -9,7 +9,7 @@ body {
   height: 100vh;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  /* overflow: hidden; */
   font-family: 'Montserrat', sans-serif;
 }
 /* body {
@@ -101,17 +101,32 @@ body {
 }
 
 .slots .reel {
+  --logo-size: 200px;
+  --strip-height: 5000px;
   position: relative;
   width: 200px;
   height: 600px;
   border: 1px solid rgba(0, 0, 0, 0.3);
   border-radius: 3px;
   overflow: hidden;
+}
+
+.slots .reel-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.slots .reel-strip {
+  width: 100%;
+  height: var(--strip-height);
   background-image: url('/TIRA_LOGOS.webp');
-  background-size: 200px auto;
+  background-size: 200px var(--strip-height);
   background-position: 0 0;
-  background-repeat: repeat-y;
-  will-change: background-position;
+  background-repeat: no-repeat;
 }
 .slots .reel::after {
   content: "";
